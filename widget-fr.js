@@ -356,5 +356,17 @@
         attempts++;
         if (attempts > 30) clearInterval(interval);
     }, 300);
-
+// PROTECTION ANTI-COPIE BASIQUE
+    const container = document.getElementById(CONFIG.containerId);
+    if(container) {
+        // Empêche le menu clic-droit
+        container.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false; 
+        });
+        // Empêche la sélection de texte
+        container.style.userSelect = 'none';
+        container.style.webkitUserSelect = 'none'; // Safari
+    }
+    
 })();
