@@ -130,7 +130,8 @@
                 <div class="kw-message-box">
                     <strong id="kw-verdict-title-fr" style="font-size: 1.2em; display:block; margin-bottom:8px;"></strong>
                     <div id="kw-verdict-desc-fr" style="font-size: 0.95em; color:#555; margin:0; line-height: 1.5;"></div>
-                    <a href="${CONFIG.quoteLink}" id="kw-cta-btn-fr" class="kw-cta-button">RAISE YOUR WATER SCORE TODAY!</a>
+                    
+                    <a href="${CONFIG.quoteLink}" id="kw-cta-btn-fr" class="kw-cta-button">AMÉLIOREZ VOTRE WATER SCORE AUJOURD'HUI !</a>
                 </div>
             </div>
 
@@ -271,12 +272,12 @@
             return [];
         }
 
-        // 3. UI & SCORE (NOUVELLE LOGIQUE INTERPRETATION)
+        // 3. UI & SCORE (INTERPRETATION OBJECTIF)
         function updateUI(thValue, cityName) {
             const th = parseFloat(thValue);
             let score;
 
-            // CALCUL SCORE KINETICO (Base 4 Paliers)
+            // CALCUL SCORE KINETICO
             if (th < 5) score = 100 - (th * 2); 
             else if (th < 15) score = 96 - (th * 1.4); 
             else if (th < 30) score = 98 - (th * 1.6);
@@ -284,38 +285,36 @@
             
             score = Math.max(30, Math.min(100, Math.round(score)));
 
-            // CALCUL DU RATIO / RÉFÉRENCE 12°f
+            // CALCUL RATIO
             const reference = 12;
-            const ratio = (th / reference).toFixed(1).replace('.0', ''); // Ex: 30/12 = 2.5
+            const ratio = (th / reference).toFixed(1).replace('.0', '');
             
             let color, title, text;
             
-            // --- NOUVELLE LOGIQUE DE TEXTE ---
-            
             if (th < 12) {
-                // EAU DOUCE (Conforme référence)
+                // < 12°f (OK)
                 color = '#00ADEF';
                 title = "EAU DOUCE (OK)";
                 text = `Votre eau (${th.toFixed(1)}°f) respecte le seuil de confort de référence (12°f).<br>Aucun traitement n'est nécessaire.`;
                 ctaBtn.style.display = 'none';
                 
             } else if (th < 15) {
-                // EAU LEGEREMENT CALCAIRE
+                // 12-15°f (Peu calcaire)
                 color = '#00ADEF'; 
                 title = "EAU PEU CALCAIRE";
                 text = `Votre eau (${th.toFixed(1)}°f) est légèrement au-dessus de la référence (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
                 
             } else if (th < 30) {
-                // EAU CALCAIRE
-                color = '#E5007E'; // Magenta
+                // 15-30°f (Calcaire)
+                color = '#E5007E';
                 title = "ADOUCISSEUR RECOMMANDÉ";
                 text = `Votre eau est calcaire (${th.toFixed(1)}°f), soit <strong>${ratio} fois</strong> la référence de confort (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
                 
             } else {
-                // EAU TRES DURE
-                color = '#F57F20'; // Orange
+                // > 30°f (Très dure)
+                color = '#F57F20';
                 title = "ADOUCISSEUR INDISPENSABLE";
                 text = `Votre eau est très dure (${th.toFixed(1)}°f), soit <strong>${ratio} fois</strong> la référence de confort (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
@@ -324,8 +323,6 @@
             displayCommune.textContent = "Qualité de l'eau à " + cityName;
             verdictTitle.textContent = title;
             verdictTitle.style.color = color;
-            
-            // Injection HTML pour permettre le gras
             verdictDesc.innerHTML = text;
             
             scoreVal.textContent = score;
@@ -356,6 +353,7 @@
         attempts++;
         if (attempts > 30) clearInterval(interval);
     }, 300);
+
 // PROTECTION ANTI-COPIE BASIQUE
     const container = document.getElementById(CONFIG.containerId);
     if(container) {
