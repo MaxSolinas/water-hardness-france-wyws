@@ -4,11 +4,12 @@
     // -----------------------------------------------------------
     const CONFIG = {
         containerId: 'kinetico-fr-widget-root',
-        quoteLink: '/durete-de-leau-en-france#Obtenez-votre-devis'
+        quoteLink: '/durete-de-leau-en-france#Obtenez-votre-devis',
+        websiteLink: 'https://www.aquapurify.eu'
     };
 
     // -----------------------------------------------------------
-    // STYLES CSS (Design V24 - Cadre + Titre Gras)
+    // STYLES CSS
     // -----------------------------------------------------------
     const css = `
         #kinetico-fr-widget-container {
@@ -63,7 +64,19 @@
         
         .kw-footer-block { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; margin-left: 30px; margin-right: 30px; }
         .kw-dealer-info { font-size: 11px; color: #555; font-weight: 400; font-family: Arial, sans-serif; line-height: 1.4; display: block; }
-        .kw-dealer-name { font-weight: 800; color: #0054A4; text-transform: uppercase; font-size: 12px; display: block; margin-bottom: 3px; }
+        
+        /* STYLE DU LIEN INVISIBLE */
+        .kw-dealer-link { 
+            color: #555; /* Gris (comme le texte) */
+            text-decoration: none; /* Pas de soulignement */
+            font-weight: 400; 
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .kw-dealer-link:hover {
+            color: #000; /* Légèrement plus foncé au survol */
+        }
+
         .kw-source-data { font-size: 9px; color: #aaa; margin-top: 10px; display: block; }
         
         .kw-loader { color: #888; display: none; margin: 10px; font-style: italic; font-size: 0.9em; }
@@ -125,7 +138,7 @@
 
             <div class="kw-footer-block">
                 <div class="kw-dealer-info">
-                    <span class="kw-dealer-name">Aqua Purify</span>
+                    <a href="${CONFIG.websiteLink}" target="_blank" class="kw-dealer-link">Aqua Purify</a><br>
                     Authorized, Independent Kinetico Dealer
                 </div>
                 <span class="kw-source-data">Données : Hub'Eau / Ministère de la Santé (API Temps Réel)</span>
@@ -145,7 +158,6 @@
         document.head.appendChild(styleTag);
         root.innerHTML = htmlTemplate;
 
-        // Elements
         const input = document.getElementById('kw-input-fr');
         const suggestions = document.getElementById('kw-suggestions-fr');
         const loader = document.getElementById('kw-loader-fr');
@@ -162,7 +174,7 @@
 
         let debounceTimer;
 
-        // 1. RECHERCHE COMMUNE (API GEO GOUV)
+        // 1. RECHERCHE COMMUNE
         input.addEventListener('input', (e) => {
             const val = e.target.value;
             clearTimeout(debounceTimer);
@@ -204,7 +216,7 @@
             suggestions.style.display = 'block';
         }
 
-        // 2. RECUPERATION DONNEES (HUB'EAU)
+        // 2. RECUPERATION DONNEES
         async function startAnalysis(insee, name) {
             loader.style.display = 'block';
             resultPanel.style.display = 'none';
@@ -212,10 +224,8 @@
             drop.style.opacity = '0';
             
             try {
-                // Recherche standard
                 let data = await fetchHubEauData(insee, 'commune');
                 
-                // Recherche réseau (si standard échoue)
                 if (!data) {
                     const udiList = await getAllUDIsFromCommune(insee);
                     if (udiList && udiList.length > 0) {
@@ -244,7 +254,6 @@
         }
 
         async function fetchHubEauData(code, type) {
-            // Param 1345 = Titre Hydrotimétrique (TH)
             let url = `https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_parametre=1345&sort=desc&size=1`;
             if (type === 'commune') url += `&code_commune=${code}`;
             else url += `&code_reseau=${code}`;
@@ -264,12 +273,11 @@
             return [];
         }
 
-        // 3. UI & SCORE
+        // 3. UI
         function updateUI(thValue, cityName) {
             const th = parseFloat(thValue);
             let score;
 
-            // CALCUL SCORE
             if (th < 5) score = 100 - (th * 2); 
             else if (th < 15) score = 96 - (th * 1.4); 
             else if (th < 30) score = 98 - (th * 1.6);
@@ -279,22 +287,22 @@
             let color, title, text;
             
             if (th < 5) {
-                color = '#00ADEF'; // Cyan
+                color = '#00ADEF';
                 title = "EXCELLENT SCORE";
                 text = `Votre eau est douce (${th.toFixed(1)}°f). La qualité est idéale pour vos appareils.`;
                 ctaBtn.style.display = 'none';
             } else if (th < 15) {
-                color = '#00ADEF'; // Cyan
+                color = '#00ADEF';
                 title = "BON SCORE, MAIS...";
                 text = `Votre eau est peu calcaire (${th.toFixed(1)}°f). Votre confort pourrait tout de même être amélioré avec un adoucisseur d'eau.`;
                 ctaBtn.style.display = 'inline-block';
             } else if (th < 30) {
-                color = '#E5007E'; // Magenta
+                color = '#E5007E';
                 title = "ADOUCISSEUR RECOMMANDÉ";
                 text = `Votre eau est calcaire (${th.toFixed(1)}°f). Un adoucisseur d'eau est vivement recommandé pour protéger votre maison.`;
                 ctaBtn.style.display = 'inline-block';
             } else {
-                color = '#F57F20'; // Orange
+                color = '#F57F20';
                 title = "ADOUCISSEUR INDISPENSABLE";
                 text = `Votre eau est très dure (${th.toFixed(1)}°f). L'installation d'un adoucisseur d'eau est impérative pour éviter les dégâts.`;
                 ctaBtn.style.display = 'inline-block';
