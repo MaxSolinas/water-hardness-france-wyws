@@ -9,7 +9,7 @@
     };
 
     // -----------------------------------------------------------
-    // STYLES CSS
+    // STYLES CSS (Design V25 - Footer Uniformisé)
     // -----------------------------------------------------------
     const css = `
         #kinetico-fr-widget-container {
@@ -67,15 +67,13 @@
         
         /* STYLE DU LIEN INVISIBLE */
         .kw-dealer-link { 
-            color: #555; /* Gris (comme le texte) */
-            text-decoration: none; /* Pas de soulignement */
+            color: #555; 
+            text-decoration: none; 
             font-weight: 400; 
             cursor: pointer;
             transition: color 0.2s;
         }
-        .kw-dealer-link:hover {
-            color: #000; /* Légèrement plus foncé au survol */
-        }
+        .kw-dealer-link:hover { color: #000; }
 
         .kw-source-data { font-size: 9px; color: #aaa; margin-top: 10px; display: block; }
         
@@ -101,7 +99,7 @@
             </div>
 
             <div class="kw-search-area">
-                <input type="text" id="kw-input-fr" class="kw-input" placeholder="Ex: Lyon, Bordeaux, Augny..." autocomplete="off">
+                <input type="text" id="kw-input-fr" class="kw-input" placeholder="Ex: Paris, Lyon..." autocomplete="off">
                 <div id="kw-suggestions-fr" class="kw-suggestions"></div>
                 <div id="kw-loader-fr" class="kw-loader">Recherche en cours...</div>
                 <div id="kw-error-fr" class="kw-error-msg"></div>
@@ -131,7 +129,7 @@
 
                 <div class="kw-message-box">
                     <strong id="kw-verdict-title-fr" style="font-size: 1.2em; display:block; margin-bottom:8px;"></strong>
-                    <p id="kw-verdict-desc-fr" style="font-size: 0.95em; color:#555; margin:0; line-height: 1.5;"></p>
+                    <div id="kw-verdict-desc-fr" style="font-size: 0.95em; color:#555; margin:0; line-height: 1.5;"></div>
                     <a href="${CONFIG.quoteLink}" id="kw-cta-btn-fr" class="kw-cta-button">RAISE YOUR WATER SCORE TODAY!</a>
                 </div>
             </div>
@@ -273,45 +271,62 @@
             return [];
         }
 
-        // 3. UI
+        // 3. UI & SCORE (NOUVELLE LOGIQUE INTERPRETATION)
         function updateUI(thValue, cityName) {
             const th = parseFloat(thValue);
             let score;
 
+            // CALCUL SCORE KINETICO (Base 4 Paliers)
             if (th < 5) score = 100 - (th * 2); 
             else if (th < 15) score = 96 - (th * 1.4); 
             else if (th < 30) score = 98 - (th * 1.6);
             else score = 49 - ((th - 30) * 0.4); 
+            
             score = Math.max(30, Math.min(100, Math.round(score)));
 
+            // CALCUL DU RATIO / RÉFÉRENCE 12°f
+            const reference = 12;
+            const ratio = (th / reference).toFixed(1).replace('.0', ''); // Ex: 30/12 = 2.5
+            
             let color, title, text;
             
-            if (th < 5) {
+            // --- NOUVELLE LOGIQUE DE TEXTE ---
+            
+            if (th < 12) {
+                // EAU DOUCE (Conforme référence)
                 color = '#00ADEF';
-                title = "EXCELLENT SCORE";
-                text = `Votre eau est douce (${th.toFixed(1)}°f). La qualité est idéale pour vos appareils.`;
+                title = "EAU DOUCE (OK)";
+                text = `Votre eau (${th.toFixed(1)}°f) respecte le seuil de confort de référence (12°f).<br>Aucun traitement n'est nécessaire.`;
                 ctaBtn.style.display = 'none';
+                
             } else if (th < 15) {
-                color = '#00ADEF';
-                title = "BON SCORE, MAIS...";
-                text = `Votre eau est peu calcaire (${th.toFixed(1)}°f). Votre confort pourrait tout de même être amélioré avec un adoucisseur d'eau.`;
+                // EAU LEGEREMENT CALCAIRE
+                color = '#00ADEF'; 
+                title = "EAU PEU CALCAIRE";
+                text = `Votre eau (${th.toFixed(1)}°f) est légèrement au-dessus de la référence (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
+                
             } else if (th < 30) {
-                color = '#E5007E';
+                // EAU CALCAIRE
+                color = '#E5007E'; // Magenta
                 title = "ADOUCISSEUR RECOMMANDÉ";
-                text = `Votre eau est calcaire (${th.toFixed(1)}°f). Un adoucisseur d'eau est vivement recommandé pour protéger votre maison.`;
+                text = `Votre eau est calcaire (${th.toFixed(1)}°f), soit <strong>${ratio} fois</strong> la référence de confort (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
+                
             } else {
-                color = '#F57F20';
+                // EAU TRES DURE
+                color = '#F57F20'; // Orange
                 title = "ADOUCISSEUR INDISPENSABLE";
-                text = `Votre eau est très dure (${th.toFixed(1)}°f). L'installation d'un adoucisseur d'eau est impérative pour éviter les dégâts.`;
+                text = `Votre eau est très dure (${th.toFixed(1)}°f), soit <strong>${ratio} fois</strong> la référence de confort (12°f).<br>L'objectif en sortie d'adoucisseur est entre <strong>6 et 8°f</strong>.`;
                 ctaBtn.style.display = 'inline-block';
             }
 
             displayCommune.textContent = "Qualité de l'eau à " + cityName;
             verdictTitle.textContent = title;
             verdictTitle.style.color = color;
-            verdictDesc.textContent = text;
+            
+            // Injection HTML pour permettre le gras
+            verdictDesc.innerHTML = text;
             
             scoreVal.textContent = score;
             dropShape.style.background = color;
@@ -331,7 +346,6 @@
         });
     }
 
-    // CHECKER AUTOMATIQUE
     let attempts = 0;
     const interval = setInterval(function() {
         const root = document.getElementById(CONFIG.containerId);
