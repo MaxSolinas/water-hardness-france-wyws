@@ -5,7 +5,7 @@
     const CONFIG = {
         containerId: 'kinetico-fr-widget-root',
         quoteLink: '/durete-de-leau-en-france#Obtenez-votre-devis',
-        websiteLink: 'https://www.aquapurify.eu'
+        websiteLink: 'https://www.aquapurify.lu'
     };
 
     // 1. CSS ISOLÉ (.kw-fr-...)
