@@ -4,7 +4,7 @@
     // ==========================================================================
     const CONFIG = {
         containerId: 'kinetico-fr-widget-root', // ID du div conteneur sur votre site
-        quoteLink: 'https://www.aquapurify.lu/devis-gratuit', // Lien vers votre page de devis
+        quoteLink: 'https://www.aquapurify.lu/get-a-quote', // Lien vers votre page de devis
         websiteLink: 'https://www.aquapurify.lu',
         // Liens produits (A adapter si vous avez des URL spécifiques pour la France)
         productCompactXP: 'https://www.aquapurify.lu/shop/adoucisseurs-deau-11/adoucisseur-kinetico-premier-compact-xp-2008',
